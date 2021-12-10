@@ -24,7 +24,7 @@ class ElGamalEcc:
     field = SubGroup(p=29, g=(5, 7), n=31, h=1) # G = {15, 13}, which has order of n = 18
     curve = Curve(a=-1, b=16, field=field, name='p1707') # y2 ≡ x3 + 7 (mod 17)
     G = curve.g                     # G=(15,13)
-    n = 17
+    n = 31
     
     def __init__(self, prKey): # class constructor
         self.prKey = prKey
@@ -62,7 +62,7 @@ class ElGamalEcc:
             """
             3. Create a random number k which is between 1 and n-1 (16)
             """
-            k = 5
+            k = 13
             # k = randrange(16)
             print("k=",k)
             """
@@ -70,25 +70,29 @@ class ElGamalEcc:
             """
             point = k * self.G
             print("G=",self.G)
-            print("point: ", point)
+            print("k*G: ", point)
             """
             5. Calculate r=x1 % n. If r=0, go back to step 3.
             """
             print(int(point.x))
             r = int(point.x) % self.n
-
+            
             """
             6. Calculate s = k^-1 (z + r*dA) % n. If s=0 go back to step 3.
             """
             inv_k = mod_inv(k, self.n) # inverse of k
+            print("inv_k=",inv_k)
             s = inv_k * (z + r * self.prKey) % self.n
+            print("s=",s)
+            
             if r != 0 and s!=0:
                 break
         
         """ 
         7. The signature is the pair (r,s)
         """
-        return r, s
+        # return r, s
+        return point, s
 
     def verifyDigitalSignature(self, m, r, s):
         """
@@ -105,54 +109,65 @@ class ElGamalEcc:
         print("z:\n", z)
         z = int(z, 16)
         
-        """
-        3. Calculate c=s^-1 mod n
-        """
-        print("s=",s)
-        inv_s = mod_inv(s, self.n) # inverse of s
-        print("inverse of s=",inv_s)
-        c = inv_s % self.n
-        print("c=",c)
-        """
-        4. Calculate:
-            u1 = z*c mod n
-            u2 = r*c mod n
-        """
-        print("z=", z)
-        u1 = z*c % self.n
-        u2 = r*c % self.n
-        print("u1=",u1, " u2=",u2)
-        """
-        5. Calculate the curve point:
-            (x1, y1) = u1 X G + u2 X pubK_A.
-            If (x1,y1)=O then the signature is invalid.
-        """
-        print("u1*self.G + u2*self.othersPublicK = \n",u1*self.G, "+",u2*self.othersPublicK )
+        #
+        V1 = s*r
+        print(V1)
+        V2 =z*self.G+r.x*self.othersPublicK
+        print(V2)
+        if (V1 == V2):
+            print("V1 == V2: ", True)
         
-        print("Others public = ", self.othersPublicK)
+        # 
         
-        point = u1*self.G + u2*self.othersPublicK
-        print("point = ", point, " inf = ", Inf(curve=self.curve))
-        if point == Inf(curve=self.curve):
-            print("Signature is invalid. Line 121")
-            return False
-        """
-        6. The signature is valid if r=x1 mod n. Invalid otherwise
-        """   
-        print("r=",r, " x1=",point.x)
-        if r == point.x % self.n:
-            print("Signature is valid.")
-            return True
-        else:
-            print("Signature is invalid. Line 130")
-            return False
+        
+        # """
+        # 3. Calculate c=s^-1 mod n
+        # """
+        # print("s=",s)
+        # inv_s = mod_inv(s, self.n) # inverse of s
+        # print("inverse of s=",inv_s)
+        # c = inv_s % self.n
+        # print("c=",c)
+        # """
+        # 4. Calculate:
+        #     u1 = z*c mod n
+        #     u2 = r*c mod n
+        # """
+        # print("z=", z)
+        # u1 = z*c % self.n
+        # u2 = r.x*c % self.n
+        # print("u1=",u1, " u2=",u2)
+        # """
+        # 5. Calculate the curve point:
+        #     (x1, y1) = u1 X G + u2 X pubK_A.
+        #     If (x1,y1)=O then the signature is invalid.
+        # """
+        # print("u1*self.G + u2*self.othersPublicK = \n",u1*self.G, "+",u2*self.othersPublicK )
+        
+        # print("Others public = ", self.othersPublicK)
+        
+        # point = u1*self.G + u2*self.othersPublicK
+        # print("point = ", point, " inf = ", Inf(curve=self.curve))
+        # if point == Inf(curve=self.curve):
+        #     print("Signature is invalid. Line 121")
+        #     return False
+        # """
+        # 6. The signature is valid if r=x1 mod n. Invalid otherwise
+        # """   
+        # print("r=",r, " x1=",point.x)
+        # if r == point.x % self.n:
+        #     print("Signature is valid.")
+        #     return True
+        # else:
+        #     print("Signature is invalid. Line 130")
+        #     return False
 
 bob = ElGamalEcc(17)
 alice = ElGamalEcc(23)      
  
 print("==== SIGN MESSAGE ====")  
 alice.setOthersPublicKey(bob.getMyPublicKey())
-msg="Hello"   
+msg="33"   
 r,s = alice.digitalSignMessage(msg)
 print("r=",r," s=",s)
 
