@@ -7,7 +7,7 @@ El-Gamal Digitial Signature on Elliptic Curve (EC)
 Creates digital signature for a message using El-Gamal
 algorithm, calculations based on ECC.
 
-@author: Ayala
+@author: Ayala Cohen
 """
 
 # import ECC
