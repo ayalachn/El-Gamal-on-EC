@@ -55,10 +55,10 @@ class ElGamalEcc:
         z = int(z, 16)
         while(True):
             """
-            3. Create a random number k which is between 1 and n-1 (16)
+            3. Create a random number k which is between 1 and n-1 (n=18 => n-1=17)
             """
-            k = 13
-            # k = randrange(16)
+            # k = 13 # for debug
+            k = randrange(17)
             """
             4. Calculate a point of the curve as (x1,y1)=k X G
             """
