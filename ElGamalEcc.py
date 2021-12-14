@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 10 11:43:28 2021
 
-El-Gamal Digitial Signature on Elliptic Curve (EC)
+El-Gamal Digital Signature on Elliptic Curve (EC)
 
 Creates digital signature for a message using El-Gamal
 algorithm, calculations based on ECC.
@@ -34,13 +34,11 @@ class ElGamalEcc:
           Where X denotes multiplication under ECC.   
         """  
         self.myPublicK= prKey * self.G
-        print("My public key is ", self.myPublicK)
     
     def setOthersPublicKey(self, othersPublicKey):
         self.othersPublicK=othersPublicKey
     
     def getMyPublicKey(self):
-        print("public key = ", self.myPublicK)
         return self.myPublicK
     
     def digitalSignMessage(self, m):
@@ -48,15 +46,12 @@ class ElGamalEcc:
             1. Create a hash of the message e=HASH(m)
             """
         e = str(hashlib.sha256(m.encode('utf-8')).hexdigest())
-        print("sha256 hash:\n", e)
-        print("Binary hash:\n", bin(int(e, 16)))
         
         e = str(bin(int(e, 16)))
         """
         2. Let z be n leftmost bits of e (n=17 in our case)
         """
         z = e[0:self.n]
-        print("z:\n", z)
         z = int(z, 16)
         while(True):
             """
@@ -64,26 +59,20 @@ class ElGamalEcc:
             """
             k = 13
             # k = randrange(16)
-            print("k=",k)
             """
             4. Calculate a point of the curve as (x1,y1)=k X G
             """
             point = k * self.G
-            print("G=",self.G)
-            print("k*G: ", point)
             """
             5. Calculate r=x1 % n. If r=0, go back to step 3.
             """
-            print(int(point.x))
             r = int(point.x) % self.n
             
             """
             6. Calculate s = k^-1 (z + r*dA) % n. If s=0 go back to step 3.
             """
             inv_k = mod_inv(k, self.n) # inverse of k
-            print("inv_k=",inv_k)
             s = inv_k * (z + r * self.prKey) % self.n
-            print("s=",s)
             
             if r != 0 and s!=0:
                 break
@@ -91,6 +80,9 @@ class ElGamalEcc:
         """ 
         7. The signature is the pair (r,s)
         """
+        
+        print("EL-GAMAL FINISHED SIGNATURE CREATION") #TEMP ********************************************
+        
         # return r, s
         return point, s
 
@@ -100,23 +92,20 @@ class ElGamalEcc:
         1. Create a hash of the message e=HASH(m)
         """
         e = str(hashlib.sha256(m.encode('utf-8')).hexdigest())
-        print("sha256 hash:\n", e)
         e = str(bin(int(e, 16)))
         """
         2. z will be the n leftmost bits of e (n=17)
         """
         z = e[0:self.n]
-        print("z:\n", z)
         z = int(z, 16)
         
         #
         V1 = s*r
-        print(V1)
-        V2 =z*self.G+r.x*self.othersPublicK
-        print(V2)
+        V2 =z*self.G + r.x*self.othersPublicK
+        print("V1: ", V1,"\nV2: ", V2)
         if (V1 == V2):
-            print("V1 == V2: ", True)
-        
+            return True
+        return False
         # 
         
         
@@ -162,15 +151,15 @@ class ElGamalEcc:
         #     print("Signature is invalid. Line 130")
         #     return False
 
-bob = ElGamalEcc(17)
-alice = ElGamalEcc(23)      
+# bob = ElGamalEcc(17)
+# alice = ElGamalEcc(23)      
  
-print("==== SIGN MESSAGE ====")  
-alice.setOthersPublicKey(bob.getMyPublicKey())
-msg="33"   
-r,s = alice.digitalSignMessage(msg)
-print("r=",r," s=",s)
+# print("==== SIGN MESSAGE ====")  
+# alice.setOthersPublicKey(bob.getMyPublicKey())
+# msg="33"   
+# r,s = alice.digitalSignMessage(msg)
+# print("r=",r," s=",s)
 
-print("==== VERIFY MESSAGE ====")  
-bob.setOthersPublicKey(alice.getMyPublicKey()) 
-print(bob.verifyDigitalSignature(m=msg, r=r, s=s))
+# print("==== VERIFY MESSAGE ====")  
+# bob.setOthersPublicKey(alice.getMyPublicKey()) 
+# print(bob.verifyDigitalSignature(m=msg, r=r, s=s))
